@@ -43,6 +43,7 @@ function Workbench({ chapter, draft, setDraft, unlocked, onGrade, confirm, indep
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [showTests, setShowTests] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const [solution, setSolution] = useState(false);
   const [graded, setGraded] = useState(false);
   const busy = status === 'loading' || status === 'running';
@@ -58,7 +59,8 @@ function Workbench({ chapter, draft, setDraft, unlocked, onGrade, confirm, indep
     <div className="section-kicker"><FlaskConical size={15}/> REPAIR THE IMPLEMENTATION</div>
     <h2>{chapter.practice.title}</h2><p className="practice-spec">{chapter.practice.spec}</p>
     <div className="practice-callout"><Lightbulb size={17}/><span>The starter is intentionally broken. Run its tests first, then make one focused change.</span></div>
-    <div className="editor-shell"><div className="editor-toolbar"><span><Code2 size={15}/> practice.py</span><button className="text-button" disabled={busy} onClick={() => confirm({ title: 'Reset this code?', text: 'Your draft for this chapter will be replaced with the broken starter. Earned progress stays saved.', action: () => { setDraft(chapter.practice.starter); setResult(null); setError(''); } })}><RotateCcw size={14}/> Reset code</button></div>
+    <div className="editor-shell"><div className="editor-toolbar"><span><Code2 size={15}/> practice.py</span><div className="button-row"><button className="text-button" onClick={() => setShowHint(!showHint)} aria-expanded={showHint}><Lightbulb size={13}/> {showHint ? 'Hide hint' : 'Editor hint'}</button><button className="text-button" disabled={busy} onClick={() => confirm({ title: 'Reset this code?', text: 'Your draft for this chapter will be replaced with the broken starter. Earned progress stays saved.', action: () => { setDraft(chapter.practice.starter); setResult(null); setError(''); } })}><RotateCcw size={14}/> Reset code</button></div></div>
+      {showHint && chapter.hints?.[0] && <div className="inline-hint" role="region" aria-label="Editor hint"><Lightbulb size={14}/><span><strong>Hint:</strong> {chapter.hints[0]}</span></div>}
       <Suspense fallback={<p className="editor-loading" role="status">Opening your Python notebook…</p>}><PythonEditor value={draft} onChange={setDraft} disabled={busy}/></Suspense>
       <div className="run-toolbar"><span className={`runtime-status ${busy ? 'working' : ''}`}><i/>{status === 'loading' ? 'Loading Python…' : status === 'running' ? 'Running Python…' : 'Python · in your browser'}</span><div className="button-row">{busy ? <button className="button danger small" onClick={stop}><Square size={14}/> Stop</button> : <><button className="button subtle small" onClick={() => execute(false)}><Play size={14}/> Run code</button><button className="button primary small" disabled={!unlocked} onClick={() => execute(true)} data-testid="run-tests"><CheckCircle2 size={15}/> Check tests</button></>}</div></div>
     </div>

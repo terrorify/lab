@@ -61,3 +61,7 @@
   .active-attempt .run-toolbar .button-row button{flex:1}
   .attempt-badge{font-size:10px;padding:3px 7px}
 }
+
+/* Inline editor hint */
+.inline-hint{display:flex;align-items:center;gap:10px;padding:9px 14px;background:#f3f0e2;border-bottom:1px solid #e1dcce;color:#576044;font-size:12px;line-height:1.6}
+.inline-hint svg{color:#849466;flex-shrink:0}
