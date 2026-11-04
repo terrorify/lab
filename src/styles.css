@@ -79,3 +79,9 @@
 .unlocked-answer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:10px 14px;background:#edf2e1;border:1px solid #d4dfbe;border-radius:6px}
 .answer-badge{display:flex;align-items:center;gap:7px;color:#53633d;font-size:12px;font-weight:600}
 .locked-answer{padding:10px 14px;background:#f7f4ea;border:1px solid #e5ded0;border-radius:6px}
+
+/* Study annotations are widgets, never editable Python source. */
+.editor-line-hint{white-space:normal;overflow-wrap:anywhere;margin:3px 12px 9px 4px;padding:8px 10px;border-left:3px solid #849466;background:#eef1e3;color:#485735;font:12px/1.6 "DM Sans",sans-serif}
+.editor-line-hint strong{color:#364529}
+.cm-line.editor-hint-target{background:#e9eddd80}
+@media(max-width:640px){.editor-line-hint{font-size:13px;margin-right:6px;padding:8px}.inline-hint{align-items:flex-start}.editor-toolbar .button-row{flex-wrap:wrap}}

@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
+import { StateField } from '@codemirror/state';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
-import { EditorView, keymap } from '@codemirror/view';
+import { EditorView, keymap, Decoration, WidgetType } from '@codemirror/view';
 import { autocompletion, acceptCompletion } from '@codemirror/autocomplete';
 import { indentWithTab } from '@codemirror/commands';
 
@@ -44,12 +46,63 @@ const setup = {
   indentOnInput: true
 };
 
-export default function PythonEditor({ value, onChange, disabled }) {
+const noHints = [];
+
+class LineHint extends WidgetType {
+  constructor(text, line) {
+    super();
+    this.text = text;
+    this.line = line;
+  }
+  eq(other) { return this.text === other.text && this.line === other.line; }
+  toDOM() {
+    const node = document.createElement('div');
+    node.className = 'editor-line-hint';
+    node.setAttribute('role', 'note');
+    const label = document.createElement('strong');
+    label.textContent = `Line ${this.line} hint · `;
+    node.append(label, document.createTextNode(this.text));
+    return node;
+  }
+}
+
+function hintDecorations(doc, hints) {
+  const positions = new Map();
+  for (let number = 1; number <= doc.lines; number++) {
+    const line = doc.line(number);
+    const anchor = line.text.trim();
+    // Ambiguous or edited starter lines get no hint, never a guessed location.
+    positions.set(anchor, positions.has(anchor) ? null : line);
+  }
+  const decorations = [];
+  for (const hint of hints) {
+    const line = positions.get(hint.anchor);
+    if (!line) continue;
+    decorations.push(Decoration.line({ class: 'editor-hint-target' }).range(line.from));
+    decorations.push(Decoration.widget({
+      widget: new LineHint(hint.text, line.number), block: true, side: 1,
+    }).range(line.to));
+  }
+  return Decoration.set(decorations, true);
+}
+
+function lineHintField(hints) {
+  return StateField.define({
+    create: state => hintDecorations(state.doc, hints),
+    update: (decorations, transaction) => transaction.docChanged
+      ? hintDecorations(transaction.state.doc, hints) : decorations,
+    provide: field => EditorView.decorations.from(field),
+  });
+}
+
+export default function PythonEditor({ value, onChange, disabled, lineHints = noHints, showLineHints = false }) {
+  const editorExtensions = useMemo(() => showLineHints && lineHints.length
+    ? [...extensions, lineHintField(lineHints)] : extensions, [lineHints, showLineHints]);
   return (
     <CodeMirror
       value={value}
       height="300px"
-      extensions={extensions}
+      extensions={editorExtensions}
       onChange={onChange}
       editable={!disabled}
       basicSetup={setup}

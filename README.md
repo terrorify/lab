@@ -30,6 +30,12 @@ The static deployment output is `dist/`. Keep `python-worker.js` at the root of 
 4. Completing all three parts masters the chapter and unlocks the next scoring gate. Reading ahead is always allowed through the course map, contents rail, or previous/next controls. Locked chapters allow code execution for exploration but not scored submissions.
 5. For independent practice, enable **Independent mode** to hide hints, translations, and reference solutions. The final chapter is an original run-length-codec debugging practice exam; allow up to 120 minutes using your own timer.
 
+### Game-development learning and line hints
+
+Core chapters now connect Python to saved settings, wave rewards, inventory pages, loot counts, save parsing, network player names, independent player bags, malformed save records, combat timestamps, and tile-map compression. Foundational lessons break down operators and types, including tuple construction, unpacking, indexing, nested mutability, and hashable coordinate keys.
+
+In Workbench, toggle **Line hints** to display study notes beneath relevant starter lines. Notes do not enter your Python source. They follow unchanged lines when you insert code; edited or ambiguous duplicate lines lose their notes rather than showing a misleading location. Independent mode hides these notes. Timed assessment editors receive no line hints.
+
 ### Scores and saved state
 
 Each chapter offers 100 XP: 20 for its concept question, 10 per snippet match, and up to 40 proportional to passing unit tests. Best scores are retained; replaying an activity does not farm XP or erase mastery. Matching accuracy describes the current round and does not penalize retries.
@@ -49,7 +55,7 @@ Chapter selection, comparison language, code drafts, and best scores are stored 
 9. `unittest`, tracebacks, print debugging, and `pdb` concepts
 10. Integrated debugging capstone: run-length encoding/decoding
 
-Includes 30 lesson sections, 10 executable repair exercises with 53 test methods, 10 concept questions, 40 matching pairs, and 45 glossary entries. All content is authored study material; it does not predict the private assessment algorithm.
+Includes executable repair exercises, concept questions, matching pairs, glossary entries, and game-development scenarios across all ten core chapters. Content is authored preparation material, not a prediction of the private assessment.
 
 ## Runner and privacy limits
 
@@ -75,7 +81,7 @@ The editors are independent alternatives for preparation, not claims of identica
 
 - `src/App.jsx`: study interface, scoring, navigation, matching, persistence, and reference desk.
 - `src/curriculum.js`: lessons, original exercises/tests/solutions, comparisons, glossary, and resources.
-- `src/PythonEditor.jsx`: lazily loaded CodeMirror editor with Python highlighting and no AI/autocompletion.
+- `src/PythonEditor.jsx`: lazily loaded CodeMirror editor with Python highlighting, local autocomplete, and optional line-hint widgets; no AI service.
 - `src/usePython.js`: worker lifecycle, cancellation, and deadlines.
 - `public/python-worker.js`: pinned Pyodide runtime, output capture, and unittest result collection.
 - `src/styles.css`: responsive parchment/coffee palette, reading typography, and reduced-motion support.
