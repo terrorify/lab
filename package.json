@@ -1,0 +1,13 @@
+{
+  "name": "python-study-cafe",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "vite --host 127.0.0.1", "build": "vite build", "preview": "vite preview --host 127.0.0.1" },
+  "dependencies": {
+    "react": "^19.2.0", "react-dom": "^19.2.0", "animejs": "^4.2.2",
+    "lucide-react": "^0.468.0", "@uiw/react-codemirror": "^4.23.7",
+    "@codemirror/lang-python": "^6.1.7", "@codemirror/view": "^6.36.5"
+  },
+  "devDependencies": { "vite": "^6.4.1", "@vitejs/plugin-react": "^4.7.0" }
+}
