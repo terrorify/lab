@@ -46,14 +46,26 @@ function Workbench({ chapter, draft, setDraft, unlocked, onGrade, confirm, indep
   const [showHint, setShowHint] = useState(false);
   const [solution, setSolution] = useState(false);
   const [graded, setGraded] = useState(false);
+  const [failCount, setFailCount] = useState(0);
   const busy = status === 'loading' || status === 'running';
   async function execute(withTests) {
     setError(''); setResult(null); setGraded(withTests);
     try {
       const output = await run({ code: draft, tests: withTests ? chapter.practice.tests : '' });
       setResult(output);
-      if (withTests && unlocked && !output.error && output.total > 0) onGrade(output.passed / output.total);
-    } catch (err) { setError(err.message); }
+      if (withTests && unlocked) {
+        const allGood = !output.error && output.total > 0 && output.passed === output.total;
+        if (allGood) {
+          onGrade(1);
+        } else {
+          setFailCount(count => count + 1);
+          if (output.total > 0) onGrade(output.passed / output.total);
+        }
+      }
+    } catch (err) {
+      setError(err.message);
+      if (withTests && unlocked) setFailCount(count => count + 1);
+    }
   }
   return <section className="workbench entry">
     <div className="section-kicker"><FlaskConical size={15}/> REPAIR THE IMPLEMENTATION</div>
@@ -66,15 +78,61 @@ function Workbench({ chapter, draft, setDraft, unlocked, onGrade, confirm, indep
     </div>
     <div className="output-panel" aria-live="polite"><div className="output-heading"><Terminal size={15}/><span>Console & test results</span>{result && graded && <strong className={result.passed === result.total && result.total > 0 && !result.error ? 'success-text' : ''}>{result.passed}/{result.total} passed</strong>}</div>
       {!result && !error && <p className="empty-output">{busy ? 'The first run downloads the Python runtime. Your page stays responsive.' : 'Your output will appear here. Print values with repr() to reveal the details.'}</p>}
-      {error && <pre className="error-output">{error}</pre>}{result?.error && <pre className="error-output">{result.error}</pre>}
-      {result?.stdout && <pre>{result.stdout}</pre>}{result?.stderr && <pre className="error-output">{result.stderr}</pre>}
-      {result && !graded && !result.stdout && !result.stderr && !result.error && <p className="empty-output">Finished. No output—add print(...) to inspect a value, or use Check tests.</p>}
-      {result?.tests?.map((test, index) => <details className={`test-result ${test.passed ? 'passed' : 'failed'}`} key={`${test.name}-${index}`}><summary>{test.passed ? <Check size={15}/> : <X size={15}/>}<span>{test.name.replace('cafe_practice.TestPractice.', '')}</span><small>{test.passed ? 'PASS' : 'FAIL'}</small></summary>{test.detail && <pre>{test.detail}</pre>}</details>)}
+      {result?.tests?.map((test, index) => {
+        const shortName = test.name.replace('cafe_practice.TestPractice.', '');
+        const diag = chapter.practice.diagnostics?.[shortName];
+        return (
+          <details className={`test-result ${test.passed ? 'passed' : 'failed'}`} key={`${test.name}-${index}`} open={!test.passed}>
+            <summary>
+              {test.passed ? <Check size={15}/> : <X size={15}/>}
+              <span>{shortName}</span>
+              <small>{test.passed ? 'PASS' : 'FAIL'}</small>
+            </summary>
+            {!test.passed && diag && (
+              <div className="test-diagnostic">
+                <div className="diag-section">
+                  <strong>Why it failed:</strong>
+                  <p>{diag.why}</p>
+                </div>
+                <div className="diag-section mend">
+                  <strong>How to mend it:</strong>
+                  <p>{diag.mend}</p>
+                </div>
+              </div>
+            )}
+            {test.detail && (
+              <details className="raw-trace">
+                <summary>View raw Python traceback</summary>
+                <pre>{test.detail}</pre>
+              </details>
+            )}
+          </details>
+        );
+      })}
       {result && graded && result.total > 0 && result.passed === result.total && !result.error && <p className="feedback success"><CheckCircle2 size={17}/> All tests passed. Complete the checkpoint to master this chapter.</p>}
     </div>
     <button className="disclosure-button" onClick={() => setShowTests(!showTests)} aria-expanded={showTests}><ChevronDown size={16} className={showTests ? 'rotated' : ''}/> {showTests ? 'Hide' : 'Read'} the unit tests <span>They are the contract.</span></button>
     {showTests && <Code label="test_practice.py">{chapter.practice.tests}</Code>}
-    {!independent && <div className="solution-area"><button className="text-button" onClick={() => setSolution(!solution)} aria-expanded={solution}><Eye size={15}/> {solution ? 'Hide' : 'Reveal'} reference solution</button><span>Try independently first. Viewing earns no XP.</span>{solution && <Code>{chapter.practice.solution}</Code>}</div>}
+    {!independent && (
+      <div className="solution-area">
+        {failCount >= 3 ? (
+          <div className="unlocked-answer">
+            <div className="answer-badge"><Lightbulb size={14}/><span>Unlocked after 3 failed check tests</span></div>
+            <button className="button subtle small" onClick={() => setSolution(!solution)} aria-expanded={solution}>
+              <Eye size={15}/> {solution ? 'Hide answer' : 'See answer'}
+            </button>
+          </div>
+        ) : (
+          <div className="locked-answer">
+            <span className="small-text muted">
+              See Answer button unlocks after 3 failed check tests ({failCount}/3 attempts).
+            </span>
+          </div>
+        )}
+        {solution && <Code>{chapter.practice.solution}</Code>}
+      </div>
+    )}
+
     <p className="fine-print">Standard-library practice. No interactive stdin or pdb in this runner. Execution stops after 12 seconds. Python downloads from jsDelivr; your code is executed in a worker, not sent to a grading server. Do not run untrusted code here.</p>
   </section>;
 }
